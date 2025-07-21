@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Email Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Email Generator Form -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-gradient-primary text-white">
+                <h3 class="mb-0">
+                    <i class="fas fa-magic me-2"></i>
+                    Generate AI-Powered Emails
+                </h3>
+                <p class="mb-0 small opacity-75">
+                    Create professional emails with advanced AI assistance
+                </p>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('generate_emails') }}" 
+                      enctype="multipart/form-data" id="emailGeneratorForm" novalidate>
+                    
+                    <!-- Email Type Selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-tags me-1"></i>Email Type
+                            </label>
+                            <select name="email_type" class="form-select" required>
+                                <option value="">Choose email type...</option>
+                                {% for email_type in email_types %}
+                                <option value="{{ email_type }}">
+                                    {{ email_type.replace('_', ' ').title() }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select an email type.</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-cogs me-1"></i>Mode
+                            </label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="email_mode" 
+                                       id="single_mode" value="single" checked>
+                                <label class="btn btn-outline-primary" for="single_mode">
+                                    <i class="fas fa-user me-1"></i>Single Email
+                                </label>
+
+                                <input type="radio" class="btn-check" name="email_mode" 
+                                       id="bulk_mode" value="bulk">
+                                <label class="btn btn-outline-primary" for="bulk_mode">
+                                    <i class="fas fa-users me-1"></i>Bulk Emails
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Instructions -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-edit me-1"></i>Custom Instructions
+                            <span class="text-muted fw-normal">(Optional)</span>
+                        </label>
+                        <textarea name="custom_instructions" class="form-control" rows="3" 
+                                  placeholder="Add specific instructions for the AI to customize your email...&#10;Example: 'Make it more casual', 'Include product details', 'Add urgency'"></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Tip: Be specific to get better results!
+                        </div>
+                    </div>
+
+                    <!-- Single Email Section -->
+                    <div id="single_email_section" class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-envelope me-1"></i>Recipient Email
+                        </label>
+                        <input type="email" name="single_email" class="form-control" 
+                               placeholder="recipient@example.com">
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+
+                    <!-- Bulk Email Section -->
+                    <div id="bulk_email_section" class="mb-4" style="display: none;">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-cloud-upload-alt me-1"></i>Upload Email List
+                        </label>
+                        
+                        <!-- File Upload Area -->
+                        <div class="file-upload-area border-2 border-dashed rounded p-4 text-center">
+                            <input type="file" name="bulk_file" id="bulk_file" class="d-none" 
+                                   accept=".csv,.xlsx,.xls,.txt">
+                            <div class="upload-icon mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary"></i>
+                            </div>
+                            <h6>Drag & Drop or Click to Upload</h6>
+                            <p class="text-muted mb-3">
+                                Support for CSV, Excel (.xlsx/.xls), and TXT files
+                            </p>
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('bulk_file').click()">
+                                <i class="fas fa-upload me-2"></i>Choose File
+                            </button>
+                        </div>
+                        
+                        <!-- File Info Display -->
+                        <div id="file_info" class="mt-3" style="display: none;"></div>
+                        
+                        <!-- Format Examples -->
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Supported formats:</strong><br>
+                                • CSV: email column or first column<br>
+                                • Excel: email column or first column<br>
+                                • TXT: one email per line<br>
+                                • Max file size: 16MB
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
+                            <i class="fas fa-magic me-2"></i>
+                            Generate Emails
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Email Type Guide -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Email Types Guide
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="email-types-grid">
+                    {% set type_icons = {
+                        'professional': 'fas fa-briefcase text-primary',
+                        'comedy': 'fas fa-laugh text-warning', 
+                        'friendly': 'fas fa-heart text-danger',
+                        'formal': 'fas fa-user-tie text-dark',
+                        'casual': 'fas fa-coffee text-brown',
+                        'marketing': 'fas fa-bullhorn text-success',
+                        'apology': 'fas fa-hand-holding-heart text-pink',
+                        'thank_you': 'fas fa-thumbs-up text-info',
+                        'invitation': 'fas fa-calendar-plus text-purple',
+                        'follow_up': 'fas fa-redo text-orange'
+                    } %}
+                    
+                    {% for email_type in email_types %}
+                    <div class="email-type-item">
+                        <i class="{{ type_icons.get(email_type, 'fas fa-envelope') }} me-2"></i>
+                        <span>{{ email_type.replace('_', ' ').title() }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <h4 class="text-primary mb-0">{{ email_types|length }}</h4>
+                            <small class="text-muted">Email Types</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <h4 class="text-success mb-0">∞</h4>
+                            <small class="text-muted">Generations</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tips Card -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Pro Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="tips-list">
+                    <div class="tip-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Be specific in custom instructions</small>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Review generated content before sending</small>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Use bulk mode for multiple recipients</small>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Test with single emails first</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Email mode switching
+document.addEventListener('DOMContentLoaded', function() {
+    const singleMode = document.getElementById('single_mode');
+    const bulkMode = document.getElementById('bulk_mode');
+    const singleSection = document.getElementById('single_email_section');
+    const bulkSection = document.getElementById('bulk_email_section');
+    
+    function toggleEmailMode() {
+        if (singleMode.checked) {
+            singleSection.style.display = 'block';
+            bulkSection.style.display = 'none';
+            document.querySelector('input[name="single_email"]').required = true;
+            document.querySelector('input[name="bulk_file"]').required = false;
+        } else {
+            singleSection.style.display = 'none';
+            bulkSection.style.display = 'block';
+            document.querySelector('input[name="single_email"]').required = false;
+            document.querySelector('input[name="bulk_file"]').required = true;
+        }
+    }
+    
+    singleMode.addEventListener('change', toggleEmailMode);
+    bulkMode.addEventListener('change', toggleEmailMode);
+    
+    // Initialize
+    toggleEmailMode();
+});
+</script>
+{% endblock %}

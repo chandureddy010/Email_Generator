@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}Review Generated Emails - AI Email Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3 class="mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Generated Emails Ready
+                        </h3>
+                        <p class="mb-0 small opacity-75">
+                            {{ emails|length }} email{{ 's' if emails|length != 1 else '' }} generated successfully
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('index') }}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </a>
+                            <form method="POST" action="{{ url_for('send_emails') }}" class="d-inline" id="sendAllForm">
+                                <button type="button" class="btn btn-warning" id="sendAllBtn">
+                                    <i class="fas fa-paper-plane me-1"></i>
+                                    Send All ({{ emails|length }})
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if emails %}
+        <!-- Email Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-envelope fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ emails|length }}</h4>
+                        <small>Total Emails</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ emails|length }}</h4>
+                        <small>Ready to Send</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-robot fa-2x mb-2"></i>
+                        <h4 class="mb-0">AI</h4>
+                        <small>Generated</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h4 class="mb-0">~{{ (emails|length * 2) }}s</h4>
+                        <small>Send Time</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generated Emails -->
+        <div class="emails-container">
+            {% for email in emails %}
+            <div class="card email-card shadow-sm mb-4" id="email-{{ loop.index }}">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="mb-0">
+                                <i class="fas fa-envelope me-2"></i>
+                                <strong>To:</strong> {{ email.recipient }}
+                            </h6>
+                            <small class="text-muted">
+                                Email #{{ loop.index }} • Type: {{ email.email_type|title }}
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-primary" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse-{{ loop.index }}" 
+                                        aria-expanded="false">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="editEmail({{ loop.index }})">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-outline-info" onclick="copyEmail({{ loop.index }})">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapse{{ ' show' if loop.index == 1 else '' }}" id="collapse-{{ loop.index }}">
+                    <div class="card-body">
+                        <!-- Subject -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-tag me-1"></i>Subject:
+                            </label>
+                            <div class="subject-display p-2 bg-light rounded border">
+                                {{ email.subject }}
+                            </div>
+                        </div>
+                        
+                        <!-- Email Body -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-file-alt me-1"></i>Email Content:
+                            </label>
+                            <div class="email-preview border rounded p-3 bg-white">
+                                {{ email.body | safe }}
+                            </div>
+                        </div>
+                        
+                        <!-- Email Actions -->
+                        <div class="email-actions pt-3 border-top">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Generated with {{ email.email_type|title }} template
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button class="btn btn-sm btn-success me-2" onclick="sendSingleEmail({{ loop.index }})">
+                                        <i class="fas fa-paper-plane me-1"></i>Send This Email
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Bulk Actions -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">Ready to send {{ emails|length }} emails?</h6>
+                        <small class="text-muted">
+                            All emails will be sent directly through your Gmail account
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button type="button" class="btn btn-success btn-lg" id="finalSendBtn">
+                            <i class="fas fa-rocket me-2"></i>
+                            Send All Emails Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No Emails Generated -->
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <h4>No Emails Generated</h4>
+                <p class="text-muted">There was an issue generating your emails. Please try again.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Email Modal -->
+<div class="modal fade" id="editEmailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Email
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editEmailForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Subject:</label>
+                        <input type="text" class="form-control" id="editSubject">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email Body:</label>
+                        <textarea class="form-control" id="editBody" rows="15"></textarea>
+                        <div class="form-text">
+                            You can edit the HTML content directly or use plain text
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveEmailEdit()">
+                    <i class="fas fa-save me-1"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmSendModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                    Confirm Send
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to send <strong id="confirmEmailCount">{{ emails|length }}</strong> emails?</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This action cannot be undone. Emails will be sent immediately from your Gmail account.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmSendBtn">
+                    <i class="fas fa-paper-plane me-1"></i>Yes, Send Emails
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentEditingEmail = null;
+
+// Send all emails with confirmation
+document.addEventListener('DOMContentLoaded', function() {
+    const sendAllBtn = document.getElementById('sendAllBtn');
+    const finalSendBtn = document.getElementById('finalSendBtn');
+    const confirmSendBtn = document.getElementById('confirmSendBtn');
+    const sendAllForm = document.getElementById('sendAllForm');
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmSendModal'));
+
+    [sendAllBtn, finalSendBtn].forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', function() {
+                confirmModal.show();
+            });
+        }
+    });
+
+    if (confirmSendBtn) {
+        confirmSendBtn.addEventListener('click', function() {
+            confirmModal.hide();
+            showLoadingOverlay('Sending emails... Please wait');
+            sendAllForm.submit();
+        });
+    }
+});
+
+function editEmail(emailIndex) {
+    const emailCard = document.querySelector(`#email-${emailIndex}`);
+    if (!emailCard) return;
+    
+    const subject = emailCard.querySelector('.subject-display').textContent.trim();
+    const body = emailCard.querySelector('.email-preview').innerHTML;
+    
+    document.getElementById('editSubject').value = subject;
+    document.getElementById('editBody').value = body;
+    
+    currentEditingEmail = emailIndex;
+    
+    const editModal = new bootstrap.Modal(document.getElementById('editEmailModal'));
+    editModal.show();
+}
+
+function saveEmailEdit() {
+    if (!currentEditingEmail) return;
+    
+    const newSubject = document.getElementById('editSubject').value;
+    const newBody = document.getElementById('editBody').value;
+    
+    const emailCard = document.querySelector(`#email-${currentEditingEmail}`);
+    if (emailCard) {
+        emailCard.querySelector('.subject-display').textContent = newSubject;
+        emailCard.querySelector('.email-preview').innerHTML = newBody;
+    }
+    
+    const editModal = bootstrap.Modal.getInstance(document.getElementById('editEmailModal'));
+    editModal.hide();
+    
+    showAlert('Email updated successfully!', 'success');
+    currentEditingEmail = null;
+}
+
+function copyEmail(emailIndex) {
+    const emailCard = document.querySelector(`#email-${emailIndex}`);
+    if (!emailCard) return;
+    
+    const subject = emailCard.querySelector('.subject-display').textContent.trim();
+    const body = emailCard.querySelector('.email-preview').textContent || emailCard.querySelector('.email-preview').innerText;
+    
+    const emailContent = `Subject: ${subject}\n\n${body}`;
+    
+    navigator.clipboard.writeText(emailContent).then(() => {
+        showAlert('Email content copied to clipboard!', 'success');
+    }).catch(() => {
+        showAlert('Failed to copy email content.', 'error');
+    });
+}
+
+function sendSingleEmail(emailIndex) {
+    // This would require additional backend endpoint for single email sending
+    showAlert('Single email sending coming soon!', 'info');
+}
+
+function showAlert(message, type) {
+    const alertContainer = document.querySelector('.container');
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    alertContainer.insertBefore(alertDiv, alertContainer.firstChild);
+    
+    setTimeout(() => {
+        if (alertDiv && alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function showLoadingOverlay(message) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.querySelector('p').textContent = message;
+        overlay.style.display = 'flex';
+    }
+}
+</script>
+{% endblock %}

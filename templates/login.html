@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Login - AI Email Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="row g-0 auth-wrapper">
+            <!-- Left Side - Welcome Content -->
+            <div class="col-md-6 auth-left">
+                <div class="p-5 h-100 d-flex flex-column justify-content-center">
+                    <div class="text-center mb-4">
+                        <div class="auth-icon mb-4">
+                            <i class="fas fa-robot fa-5x text-primary"></i>
+                        </div>
+                        <h2 class="text-primary mb-3">AI Email Generator</h2>
+                        <p class="lead text-muted">
+                            Generate professional emails with AI and send them directly through your Gmail account.
+                        </p>
+                    </div>
+                    
+                    <!-- Features List -->
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-magic text-primary"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h6>10 Email Types</h6>
+                                <small class="text-muted">Professional, comedy, marketing, and more</small>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-upload text-success"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h6>Bulk Processing</h6>
+                                <small class="text-muted">Upload CSV, Excel, or TXT files</small>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-paper-plane text-info"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h6>Direct Gmail Integration</h6>
+                                <small class="text-muted">Send emails directly from your account</small>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain text-warning"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h6>AI-Powered</h6>
+                                <small class="text-muted">Advanced Claude AI for content generation</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side - Login Form -->
+            <div class="col-md-6 auth-right">
+                <div class="p-5 h-100 d-flex flex-column justify-content-center">
+                    <div class="text-center">
+                        <h3 class="mb-4">Welcome Back!</h3>
+                        <p class="text-muted mb-4">
+                            Sign in with your Google account to get started
+                        </p>
+                        
+                        <!-- Google Sign In Button -->
+                        <a href="{{ url_for('login') }}" class="btn btn-google btn-lg w-100 mb-4">
+                            <i class="fab fa-google me-2"></i>
+                            Continue with Google
+                        </a>
+                        
+                        <!-- Security Notice -->
+                        <div class="security-notice">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                                    <small class="d-block text-muted">Secure</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-user-lock fa-2x text-info mb-2"></i>
+                                    <small class="d-block text-muted">Private</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-check-circle fa-2x text-primary mb-2"></i>
+                                    <small class="d-block text-muted">Trusted</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Privacy Notice -->
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                We only request permission to send emails on your behalf. 
+                                Your data remains secure and private.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>
+                    How It Works
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h6>Connect</h6>
+                                <p class="small text-muted">
+                                    Sign in securely with your Google account
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h6>Generate</h6>
+                                <p class="small text-muted">
+                                    Choose email type and add recipients
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h6>Review</h6>
+                                <p class="small text-muted">
+                                    Check and customize AI-generated content
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h6>Send</h6>
+                                <p class="small text-muted">
+                                    Send emails directly through Gmail
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

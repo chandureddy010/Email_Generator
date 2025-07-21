@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Success - AI Email Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Success Header -->
+        <div class="text-center mb-5">
+            <div class="success-animation mb-4">
+                <i class="fas fa-check-circle fa-6x text-success"></i>
+            </div>
+            <h1 class="text-success mb-3">Mission Accomplished! 🎉</h1>
+            <p class="lead text-muted">
+                Your emails have been processed and sent through Gmail
+            </p>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="card shadow-lg mb-4">
+            <div class="card-body p-4">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="result-stat">
+                            <div class="stat-icon bg-success text-white rounded-circle mx-auto mb-3">
+                                <i class="fas fa-paper-plane fa-2x"></i>
+                            </div>
+                            <h2 class="text-success mb-1">{{ sent_count }}</h2>
+                            <p class="text-muted mb-0">Successfully Sent</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="result-stat">
+                            <div class="stat-icon bg-primary text-white rounded-circle mx-auto mb-3">
+                                <i class="fas fa-envelope fa-2x"></i>
+                            </div>
+                            <h2 class="text-primary mb-1">{{ total_count }}</h2>
+                            <p class="text-muted mb-0">Total Emails</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="result-stat">
+                            <div class="stat-icon bg-info text-white rounded-circle mx-auto mb-3">
+                                <i class="fas fa-percentage fa-2x"></i>
+                            </div>
+                            <h2 class="text-info mb-1">{{ ((sent_count / total_count) * 100)|round|int }}%</h2>
+                            <p class="text-muted mb-0">Success Rate</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Success/Failure Messages -->
+                <div class="mt-4">
+                    {% if sent_count == total_count %}
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <i class="fas fa-thumbs-up fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Perfect! All emails sent successfully!</h5>
+                                <p class="mb-0">Your recipients should receive the emails within a few minutes.</p>
+                            </div>
+                        </div>
+                    {% elif sent_count > 0 %}
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Partially Successful</h5>
+                                <p class="mb-0">
+                                    {{ sent_count }} out of {{ total_count }} emails were sent successfully. 
+                                    Some emails may have failed due to invalid addresses or sending limits.
+                                </p>
+                                {% if failed_emails %}
+                                <small class="text-muted">
+                                    Failed addresses: {{ failed_emails[:3]|join(', ') }}
+                                    {% if failed_emails|length > 3 %} and {{ failed_emails|length - 3 }} more{% endif %}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="fas fa-times-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Sending Failed</h5>
+                                <p class="mb-0">
+                                    No emails were sent successfully. Please check your Gmail permissions and email addresses, then try again.
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mb-5">
+            <div class="btn-group-vertical d-md-none">
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg mb-2">
+                    <i class="fas fa-plus me-2"></i>Generate More Emails
+                </a>
+                <a href="https://mail.google.com" target="_blank" class="btn btn-outline-primary btn-lg mb-2">
+                    <i class="fas fa-external-link-alt me-2"></i>Check Gmail
+                </a>
+            </div>
+            
+            <div class="btn-group d-none d-md-block">
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-plus me-2"></i>Generate More Emails
+                </a>
+                <a href="https://mail.google.com" target="_blank" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-external-link-alt me-2"></i>Check Gmail
+                </a>
+            </div>
+        </div>
+
+        <!-- Delivery Timeline -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>What Happens Next?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Emails Sent <span class="badge bg-success">Complete</span></h6>
+                            <small class="text-muted">Your emails have been processed and sent through Gmail</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Email Delivery <span class="badge bg-primary">In Progress</span></h6>
+                            <small class="text-muted">Emails are being delivered to recipients (typically within 1-5 minutes)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Recipients Receive <span class="badge bg-info">Upcoming</span></h6>
+                            <small class="text-muted">Recipients will see your emails in their inbox</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips and Best Practices -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Email Best Practices
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <small>Always personalize your emails</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <small>Keep subject lines clear and engaging</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <small>Review content before sending</small>
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <small>Respect recipient preferences</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Track Performance
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-eye text-primary me-2"></i>
+                                <small>Check Gmail sent folder for confirmations</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-reply text-info me-2"></i>
+                                <small>Monitor replies and responses</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                <small>Watch for bounce-back messages</small>
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <small>Track engagement and feedback</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add celebration animation
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate success icon
+    const successIcon = document.querySelector('.success-animation i');
+    if (successIcon) {
+        successIcon.style.transform = 'scale(0)';
+        successIcon.style.transition = 'transform 0.5s ease-out';
+        
+        setTimeout(() => {
+            successIcon.style.transform = 'scale(1)';
+        }, 200);
+    }
+    
+    // Auto-refresh Gmail link
+    const gmailLink = document.querySelector('a[href*="mail.google.com"]');
+    if (gmailLink) {
+        gmailLink.addEventListener('click', function() {
+            // Add timestamp to force refresh
+            this.href = 'https://mail.google.com/mail/u/0/#sent';
+        });
+    }
+});
+
+// Confetti effect for perfect success
+{% if sent_count == total_count and sent_count > 0 %}
+function createConfetti() {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
+    const confettiContainer = document.createElement('div');
+    confettiContainer.style.position = 'fixed';
+    confettiContainer.style.top = '0';
+    confettiContainer.style.left = '0';
+    confettiContainer.style.width = '100%';
+    confettiContainer.style.height = '100%';
+    confettiContainer.style.pointerEvents = 'none';
+    confettiContainer.style.zIndex = '9999';
+    document.body.appendChild(confettiContainer);
+    
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'absolute';
+        confetti.style.width = '10px';
+        confetti.style.height = '10px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.animationName = 'fall';
+        confetti.style.animationDuration = (Math.random() * 2 + 1) + 's';
+        confetti.style.animationTimingFunction = 'linear';
+        confetti.style.animationIterationCount = '1';
+        
+        confettiContainer.appendChild(confetti);
+    }
+    
+    // Clean up after animation
+    setTimeout(() => {
+        document.body.removeChild(confettiContainer);
+    }, 3000);
+}
+
+// Add CSS animation for confetti
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fall {
+        from {
+            transform: translateY(-100vh) rotate(0deg);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Trigger confetti after page load
+setTimeout(createConfetti, 1000);
+{% endif %}
+</script>
+{% endblock %}
